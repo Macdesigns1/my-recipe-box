@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#8b5e4b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="My Recipe Box">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon.svg">
+<title>My Recipe Box</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<section id="authScreen" class="auth-screen">
+  <div class="auth-card">
+    <h1>🍴 My Recipe Box</h1>
+    <p>Your private cloud recipe collection.</p>
+    <label>Email<input id="email" type="email" autocomplete="email"></label>
+    <label>Password<input id="password" type="password" autocomplete="current-password" minlength="6"></label>
+    <div class="actions">
+      <button id="signInBtn">Sign In</button>
+      <button id="signUpBtn" class="secondary">Create Account</button>
+    </div>
+    <p id="authMessage" class="message"></p>
+  </div>
+</section>
+
+<div id="app" hidden>
+<header>
+  <strong>🍴 My Recipe Box</strong>
+  <div class="header-actions">
+    <span id="userEmail"></span>
+    <button id="signOutBtn" class="secondary">Sign Out</button>
+    <button id="addRecipeBtn">＋ Add Recipe</button>
+  </div>
+</header>
+
+<main>
+<section class="hero">
+  <h1>My Recipe Box</h1>
+  <p>Photos, screenshots, PDFs, links, notes and all the recipes you want to keep.</p>
+  <input id="search" placeholder="🔎 Search all recipes, ingredients or tags…">
+</section>
+
+<div class="category-heading">
+  <h2>Categories</h2>
+  <button id="addCategoryBtn" class="secondary">＋ Add Category</button>
+</div>
+<div id="categories" class="chips"></div>
+
+<div class="quick-actions">
+  <button id="randomBtn" class="feature">🎲 What Should I Make?</button>
+  <button id="favoritesBtn" class="feature">⭐ Favorites</button>
+  <button id="groceryBtn" class="feature grocery-feature">🛒 Grocery List <span id="groceryBadge"></span></button>
+  <button type="button" id="mealPlannerBtn" class="feature">📅 Weekly Meal Planner</button>
+</div>
+
+<section id="tagsSection" hidden>
+  <h2>Browse by Tags</h2>
+  <div id="tagCloud" class="chips"></div>
+</section>
+
+<div class="section-title"><h2 id="listTitle">Recently Added</h2><span id="recipeCount"></span></div>
+<p id="loadMessage" class="message"></p>
+<div id="recipeGrid" class="recipe-grid"></div>
+</main>
+</div>
+
+<dialog id="categoryDialog">
+<form id="categoryForm">
+  <div class="dialog-title"><h2>Add Category</h2><button type="button" class="icon secondary" id="cancelCategoryTop">×</button></div>
+  <p>Create any category you want. It will be saved to your Recipe Box account.</p>
+  <label>Category name<input id="categoryName" maxlength="60" required placeholder="Example: Air Fryer"></label>
+  <p id="categoryMessage" class="message"></p>
+  <div class="actions right">
+    <button type="button" class="secondary" id="cancelCategoryBtn">Cancel</button>
+    <button id="saveCategoryBtn">Add Category</button>
+  </div>
+</form>
+</dialog>
+
+<dialog id="recipeDialog">
+<form id="recipeForm">
+  <div class="dialog-title"><h2 id="formTitle">Add Recipe</h2><button type="button" class="icon secondary" id="cancelTop">×</button></div>
+  <input id="recipeId" type="hidden">
+  <label>Recipe name<input id="recipeName" required></label>
+  <label>Category<select id="category"></select></label>
+  <label>Tags <small>(separate with commas)</small><input id="tags" placeholder="Crockpot, Easy, Family Favorite"></label>
+  <label>Main food photo<input id="mainPhoto" type="file" accept="image/*"></label>
+  <label>Recipe screenshot to import <small>(temporary — not saved with the recipe)</small><input id="recipeFile" type="file" accept="image/*"></label>
+  <div class="ingredient-reader">
+    <button type="button" id="extractIngredientsBtn" class="secondary">✨ Read Recipe from Image</button>
+    <small>Choose a screenshot above, then click this button. It will fill in both Ingredients and Directions. Review and edit the text before saving.</small>
+    <p id="extractMessage" class="message"></p>
+  </div>
+  <label>Original recipe webpage<input id="sourceUrl" type="url" placeholder="https://..."></label>
+  <label>Ingredients<textarea id="ingredients" placeholder="One ingredient per line"></textarea></label>
+  <label>Directions<textarea id="directions"></textarea></label>
+  <div class="two-col">
+    <label>Prep time<input id="prepTime"></label>
+    <label>Cook time<input id="cookTime"></label>
+    <label>Servings<input id="servings"></label>
+    <label>Calories / nutrition<input id="nutrition"></label>
+  </div>
+  <label>Date made<input id="dateMade" type="date"></label>
+  <label>Notes<textarea id="notes"></textarea></label>
+  <p id="saveMessage" class="message"></p>
+  <div class="recipe-form-actions">
+    <button type="button" id="deleteRecipeBtn" class="danger" hidden>🗑 Delete Recipe</button>
+    <div class="actions right">
+      <button type="button" class="secondary" id="cancelBtn">Cancel</button>
+      <button id="saveBtn">Save Recipe</button>
+    </div>
+  </div>
+</form>
+</dialog>
+
+<dialog id="ingredientPickerDialog">
+  <div class="dialog-title"><h2>Add Ingredients to Grocery List</h2><button type="button" class="icon secondary" id="closeIngredientPicker">×</button></div>
+  <p id="ingredientPickerRecipe" class="picker-recipe-name"></p>
+  <p>Select the ingredients you need. You can edit them before adding.</p>
+  <div class="picker-tools">
+    <button type="button" class="secondary" id="selectAllIngredients">Select All</button>
+    <button type="button" class="secondary" id="selectNoIngredients">Select None</button>
+  </div>
+  <div id="ingredientPickerList" class="ingredient-picker-list"></div>
+  <p id="ingredientPickerMessage" class="message"></p>
+  <div class="actions right">
+    <button type="button" class="secondary" id="cancelIngredientPicker">Cancel</button>
+    <button type="button" id="addSelectedIngredients">🛒 Add Selected</button>
+  </div>
+</dialog>
+
+
+<dialog id="mealPlannerDialog" class="wide-dialog">
+  <div class="dialog-head">
+    <div>
+      <h2>📅 Weekly Meal Planner</h2>
+      <div id="mealWeekLabel" class="muted"></div>
+    </div>
+    <button type="button" class="icon-btn" id="closeMealPlannerBtn" aria-label="Close">×</button>
+  </div>
+
+  <div class="week-nav">
+    <button type="button" class="secondary" id="prevWeekBtn">← Previous</button>
+    <button type="button" class="secondary" id="thisWeekBtn">This Week</button>
+    <button type="button" class="secondary" id="nextWeekBtn">Next →</button>
+  </div>
+
+  <div id="mealPlannerGrid" class="meal-planner-grid"></div>
+
+  <div class="planner-actions">
+    <button type="button" id="addWeekGroceryBtn">🛒 Add Week to Grocery List</button>
+  </div>
+  <div id="mealPlannerMessage" class="message"></div>
+</dialog>
+
+<dialog id="groceryDialog" class="grocery-dialog">
+  <div class="dialog-title"><h2>🛒 My Grocery List</h2><button type="button" class="icon secondary" id="closeGroceryBtn">×</button></div>
+  <form id="manualGroceryForm" class="manual-grocery-form">
+    <input id="manualGroceryItem" placeholder="Add an item manually…" required>
+    <button>Add Item</button>
+  </form>
+  <div class="grocery-toolbar">
+    <span id="grocerySummary"></span>
+    <button type="button" class="secondary" id="clearCheckedBtn">Clear Checked</button>
+  </div>
+  <p id="groceryMessage" class="message"></p>
+  <div id="groceryList" class="grocery-list"></div>
+</dialog>
+
+<dialog id="viewDialog">
+  <button id="closeViewBtn" class="icon secondary close-view">×</button>
+  <div id="recipeView"></div>
+</dialog>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="app.js"></script>
+</body>
+</html>
